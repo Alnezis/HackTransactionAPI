@@ -37,6 +37,7 @@ func main() {
 
 	router.HandleFunc("/statistic/productRating", controllers.ProductRating).Methods("GET")
 
+	router.HandleFunc("/statistic/merchantProductRating", controllers.MerchantProductRating).Methods("GET")
 	router.HandleFunc("/uploadImage", controllers.UploadFile).Methods("POST")
 
 	router.PathPrefix("/images").Handler(http.StripPrefix("/images", http.FileServer(http.Dir("images/")))).Methods("GET")

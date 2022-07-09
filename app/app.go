@@ -42,7 +42,10 @@ func init() {
     product_name    varchar,
     product_cost    integer,
     merchant_name    varchar,
-    mcc    integer
+    mcc    integer,
+    interchange_sum numeric default 0,
+	card_type varchar default ''
+
 );`)
 	api.CheckErrInfo(err, "test users")
 }

@@ -17,8 +17,8 @@ func Get(id string) Transaction {
 
 func New(i Transaction) int {
 	var id int
-	err := app.DB.Get(&id, `INSERT INTO transaction (user_id, check_id, product_name, product_cost, merchant_name, mcc) VALUES ($1,$2,$3,$4,$5,$6) returning id`,
-		i.UserId, i.CheckId, i.ProductName, i.ProductCost, i.MerchantName, i.MCC)
+	err := app.DB.Get(&id, `INSERT INTO transaction (user_id, check_id, product_name, product_cost, merchant_name, mcc, interchange_sum, card_type) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) returning id`,
+		i.UserId, i.CheckId, i.ProductName, i.ProductCost, i.MerchantName, i.MCC, i.InterchangeSum, i.CardType)
 	api.CheckErrInfo(err, "NewT")
 	return id
 }
@@ -31,8 +31,10 @@ type Transaction struct {
 	ProductName string `json:"product_name" db:"product_name"`
 	ProductCost int    `json:"product_cost" db:"product_cost"`
 
-	MerchantName string `json:"merchant_name" db:"merchant_name"`
-	MCC          int    `json:"mcc" db:"mcc"`
+	MerchantName   string  `json:"merchant_name" db:"merchant_name"`
+	MCC            int     `json:"mcc" db:"mcc"`
+	InterchangeSum float64 `json:"interchange_sum" db:"interchange_sum"`
+	CardType       string  `json:"card_type" db:"card_type"`
 }
 
 func GetTr(userID string, offset string) []Transaction {
@@ -52,15 +54,17 @@ func GetTr(userID string, offset string) []Transaction {
 }
 
 type Check struct {
-	CheckId      int    `json:"check_id" db:"check_id"`
-	MerchantName string `json:"merchant_name" db:"merchant_name"`
-	Count        int    `json:"count" db:"count"`
-	Sum          int    `json:"sum" db:"sum"`
-	Mcc          int    `json:"mcc" db:"mcc"`
+	CheckId        int     `json:"check_id" db:"check_id"`
+	MerchantName   string  `json:"merchant_name" db:"merchant_name"`
+	Count          int     `json:"count" db:"count"`
+	Sum            int     `json:"sum" db:"sum"`
+	Mcc            int     `json:"mcc" db:"mcc"`
+	InterchangeSum float64 `json:"interchange_sum" db:"interchange_sum"`
+	CardType       string  `json:"card_type" db:"card_type"`
 }
 
 func GetChecks(userID string) []Check {
-	rows, err := app.DB.Queryx("SELECT check_id, merchant_name, count(check_id), sum(product_cost), mcc FROM transaction where user_id=$1 GROUP BY check_id, merchant_name, mcc;", userID)
+	rows, err := app.DB.Queryx("SELECT check_id, merchant_name, count(check_id), sum(product_cost), mcc, interchange_sum, card_type FROM transaction where user_id=$1 GROUP BY check_id, merchant_name, mcc, interchange_sum, card_type;", userID)
 	api.CheckErrInfo(err, "GetChecks")
 
 	i := []Check{}
@@ -97,25 +101,22 @@ func GetCheckContent(userID, checkID string) []Product {
 }
 
 func ParseFILE() {
-	excelFileName := "./HistoryDataSet.csv.xlsx"
+	excelFileName := "./dop.xlsx"
 	xlFile, err := xlsx.OpenFile(excelFileName)
 	if err != nil {
-		fmt.Println("err")
+		fmt.Println("err file xlsx")
 	}
 	for _, sheet := range xlFile.Sheets {
 		for _, row := range sheet.Rows {
 			var t Transaction
-			fmt.Println(row.Cells)
 			t.UserId = int(pyraconv.ToFloat64(row.Cells[0]))
-			t.CheckId = int(pyraconv.ToFloat64(row.Cells[1]))
-			t.ProductName = pyraconv.ToString(row.Cells[2])
-
-			t.ProductCost = int(pyraconv.ToFloat64(row.Cells[3]))
-
-			t.MerchantName = pyraconv.ToString(row.Cells[4])
-
-			t.MCC = int(pyraconv.ToFloat64(row.Cells[5]))
-
+			t.CardType = pyraconv.ToString(row.Cells[1])
+			t.CheckId = int(pyraconv.ToFloat64(row.Cells[2]))
+			t.ProductName = pyraconv.ToString(row.Cells[4])
+			t.ProductCost = int(pyraconv.ToFloat64(row.Cells[5]))
+			t.MerchantName = pyraconv.ToString(row.Cells[6])
+			t.MCC = int(pyraconv.ToFloat64(row.Cells[7]))
+			t.InterchangeSum = pyraconv.ToFloat64(row.Cells[13])
 			fmt.Println(New(t))
 		}
 	}
