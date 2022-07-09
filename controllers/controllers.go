@@ -104,13 +104,10 @@ func MerchantProductRating(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var exist bool
-	err := app.DB.Get(&exist, `SELECT exists(select id FROM transaction where  merchant_name = $1);`, params["merchant_name"][0])
-	api.CheckErrInfo(err, "MerchantProductRating 9")
-	if !exist {
+	if !merchant.Exist(params["merchant_name"][0]) {
 		json.NewEncoder(w).Encode(&Response{
 			Error: &Error{
-				Message: "merchant_name отсутствует в базе",
+				Message: fmt.Sprintf("merchant_name (%s) отсутствует в базе", params["merchant_name"][0]),
 				Code:    500,
 			},
 		})
