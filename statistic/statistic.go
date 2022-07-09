@@ -3,6 +3,7 @@ package statistic
 import (
 	"HackTransactionAPI/api"
 	"HackTransactionAPI/app"
+	"HackTransactionAPI/etc"
 	"fmt"
 	"math"
 	"sort"
@@ -174,6 +175,9 @@ type Summary struct {
 
 	InterchangeSum  float64 `json:"interchange_sum" db:"interchange_sum"`
 	TurnoverProduct float64 `json:"turnover_product" db:"turnover_product"`
+
+	Mcc     int    `json:"mcc" db:"mcc"`
+	MccName string `json:"mcc_name" db:"mcc_name"`
 }
 
 func SummaryByMerchant(merchantName string) Summary {
@@ -187,10 +191,12 @@ func SummaryByMerchant(merchantName string) Summary {
     count(distinct user_id) as users,
     round(sum(product_cost)/count(distinct user_id)::numeric,2) as turnover_users,
     round(sum(interchange_sum)::numeric,2) as interchange_sum,
-    round(sum(interchange_sum)/ sum(product_cost)*100::numeric,2) as turnover_product
+    round(sum(interchange_sum)/ sum(product_cost)*100::numeric,2) as turnover_product,
+    mcc
 from transaction where merchant_name=$1
-group by merchant_name order by count desc;`, merchantName)
+group by merchant_name, mcc order by count desc;`, merchantName)
 	api.CheckErrInfo(err, "SummaryByMerchant 1")
+	i.MccName = etc.MccName(i.Mcc)
 	return i
 }
 
@@ -203,9 +209,10 @@ func SummaryMerchantAll() []Summary {
     count(distinct user_id) as users,
     round(sum(product_cost)/count(distinct user_id)::numeric,2) as turnover_users,
     round(sum(interchange_sum)::numeric,2) as interchange_sum,
-    round(sum(interchange_sum)/ sum(product_cost)*100::numeric,2) as turnover_product
+    round(sum(interchange_sum)/ sum(product_cost)*100::numeric,2) as turnover_product,
+    mcc
 from transaction
-group by merchant_name order by count desc;`)
+group by merchant_name, mcc order by count desc;`)
 	api.CheckErrInfo(err, "SummaryMerchantAll 1")
 
 	i := []Summary{}
@@ -214,6 +221,7 @@ group by merchant_name order by count desc;`)
 		var item Summary
 		err = rows.StructScan(&item)
 		api.CheckErrInfo(err, "SummaryMerchantAll 2")
+		item.MccName = etc.MccName(item.Mcc)
 		i = append(i, item)
 	}
 	_ = rows.Close()
