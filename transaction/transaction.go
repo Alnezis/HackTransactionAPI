@@ -113,7 +113,7 @@ func ParseFILE() {
 			t.CardType = pyraconv.ToString(row.Cells[1])
 			t.CheckId = int(pyraconv.ToFloat64(row.Cells[2]))
 			t.ProductName = pyraconv.ToString(row.Cells[4])
-			t.ProductCost = int(pyraconv.ToFloat64(row.Cells[5]))
+			t.ProductCost = pyraconv.ToFloat64(row.Cells[5])
 			t.MerchantName = pyraconv.ToString(row.Cells[6])
 			t.MCC = int(pyraconv.ToFloat64(row.Cells[7]))
 			t.InterchangeSum = pyraconv.ToFloat64(row.Cells[13])
