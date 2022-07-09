@@ -11,3 +11,11 @@ Routes:
 
 - URL: https://alnezis.riznex.ru:1337/statistic/productRating
   ![image](https://user-images.githubusercontent.com/56168421/178101304-6fe16f49-eaaf-4d9b-863f-cf087ac1b5fd.png)
+  
+- URL: https://alnezis.riznex.ru:1337/statistic/summaryByMerchant?merchant_name=Магнит
+  ![image](https://user-images.githubusercontent.com/56168421/178118897-d1f7dffa-713c-40b4-841b-a10368292a55.png)
+  
+- URL: https://alnezis.riznex.ru:1337/statistic/summaryMerchantAll
+![image](https://user-images.githubusercontent.com/56168421/178118940-461a3e58-be75-46ee-b799-f6f2105e20ae.png)
+
+
