@@ -34,7 +34,7 @@ func ProductRating() []Result {
 		api.CheckErrInfo(err, "GetChecks")
 		if i < 80 {
 
-			m[item.ProductName] = &Result{A: true, PsA: item.Sum}
+			m[item.ProductName] = &Result{A: true, PsA: math.Round(item.Sum*100) / 100}
 			i += item.Sum
 		} else {
 
@@ -56,7 +56,7 @@ func ProductRating() []Result {
 		err = rowsb.StructScan(&item)
 		api.CheckErrInfo(err, "GetChecks")
 		if i < 80 {
-			m[item.ProductName].PsB = item.Sum
+			m[item.ProductName].PsB = math.Round(item.Sum*100) / 100
 			m[item.ProductName].B = true
 			i += item.Sum
 		} else {
@@ -80,6 +80,11 @@ func ProductRating() []Result {
 			}
 		}
 	}
+
+	sort.Slice(res, func(i, j int) (less bool) {
+		return res[i].ProductName < res[j].ProductName
+	})
+
 	return res
 }
 
@@ -87,7 +92,7 @@ func MerchantProductRating(merchantName string) []Result {
 
 	var m = map[string]*Result{}
 
-	var sumCost int
+	var sumCost float64
 	err := app.DB.Get(&sumCost, `SELECT sum(product_cost) as sum FROM transaction where  merchant_name = $1;`, merchantName)
 	api.CheckErrInfo(err, "MerchantProductRating 1")
 

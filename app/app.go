@@ -40,10 +40,10 @@ func init() {
     user_id integer,
     check_id    integer,
     product_name    varchar,
-    product_cost    integer,
+    product_cost    numeric(18,2),
     merchant_name    varchar,
     mcc    integer,
-    interchange_sum numeric default 0,
+    interchange_sum numeric(18,2) default 0,
 	card_type varchar default ''
 
 );`)

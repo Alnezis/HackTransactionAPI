@@ -28,8 +28,8 @@ type Transaction struct {
 	UserId  int `json:"user_id" db:"user_id"`
 	CheckId int `json:"check_id" db:"check_id"`
 
-	ProductName string `json:"product_name" db:"product_name"`
-	ProductCost int    `json:"product_cost" db:"product_cost"`
+	ProductName string  `json:"product_name" db:"product_name"`
+	ProductCost float64 `json:"product_cost" db:"product_cost"`
 
 	MerchantName   string  `json:"merchant_name" db:"merchant_name"`
 	MCC            int     `json:"mcc" db:"mcc"`
@@ -57,14 +57,14 @@ type Check struct {
 	CheckId        int     `json:"check_id" db:"check_id"`
 	MerchantName   string  `json:"merchant_name" db:"merchant_name"`
 	Count          int     `json:"count" db:"count"`
-	Sum            int     `json:"sum" db:"sum"`
+	Sum            float64 `json:"sum" db:"sum"`
 	Mcc            int     `json:"mcc" db:"mcc"`
 	InterchangeSum float64 `json:"interchange_sum" db:"interchange_sum"`
 	CardType       string  `json:"card_type" db:"card_type"`
 }
 
 func GetChecks(userID string) []Check {
-	rows, err := app.DB.Queryx("SELECT check_id, merchant_name, count(check_id), sum(product_cost), mcc, interchange_sum, card_type FROM transaction where user_id=$1 GROUP BY check_id, merchant_name, mcc, interchange_sum, card_type;", userID)
+	rows, err := app.DB.Queryx("SELECT check_id, merchant_name, count(check_id), sum(product_cost), mcc, sum(interchange_sum) as interchange_sum, card_type FROM transaction where user_id=$1 GROUP BY check_id, merchant_name, mcc, card_type;", userID)
 	api.CheckErrInfo(err, "GetChecks")
 
 	i := []Check{}
@@ -80,12 +80,12 @@ func GetChecks(userID string) []Check {
 }
 
 type Product struct {
-	ProductName string `json:"product_name" db:"product_name"`
-	ProductCost int    `json:"product_cost" db:"product_cost"`
+	ProductName string  `json:"product_name" db:"product_name"`
+	ProductCost float64 `json:"product_cost" db:"product_cost"`
 }
 
 func GetCheckContent(userID, checkID string) []Product {
-	rows, err := app.DB.Queryx("select product_name, product_cost from transaction where user_id=$1 and check_id=$2;", userID, checkID)
+	rows, err := app.DB.Queryx("select product_name, product_cost from transaction where user_id=$1 and check_id=$2 order by product_name;", userID, checkID)
 	api.CheckErrInfo(err, "GetCheckContent")
 
 	i := []Product{}
