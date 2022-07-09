@@ -36,6 +36,8 @@ func main() {
 	router.HandleFunc("/user/check/products", controllers.Products).Methods("GET")
 
 	router.HandleFunc("/statistic/productRating", controllers.ProductRating).Methods("GET")
+	router.HandleFunc("/statistic/summaryMerchantAll", controllers.SummaryMerchantAll).Methods("GET")
+	router.HandleFunc("/statistic/summaryByMerchant", controllers.SummaryByMerchant).Methods("GET")
 
 	router.HandleFunc("/statistic/merchantProductRating", controllers.MerchantProductRating).Methods("GET")
 	router.HandleFunc("/uploadImage", controllers.UploadFile).Methods("POST")

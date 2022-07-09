@@ -4,6 +4,8 @@ import (
 	"HackTransactionAPI/api"
 	"HackTransactionAPI/app"
 	"fmt"
+	"math"
+	"sort"
 )
 
 type T struct {
@@ -160,4 +162,60 @@ func MerchantProductRating(merchantName string) []Result {
 	}
 	fmt.Println(res, len(res))
 	return res
+}
+
+type Summary struct {
+	MerchantName  string  `json:"merchant_name" db:"merchant_name"`
+	Sum           float64 `json:"sum" db:"sum"`
+	Count         int     `json:"count" db:"count"`
+	Turnover      float64 `json:"turnover" db:"turnover"`
+	Users         int     `json:"users" db:"users"`
+	TurnoverUsers float64 `json:"turnover_users" db:"turnover_users"`
+
+	InterchangeSum  float64 `json:"interchange_sum" db:"interchange_sum"`
+	TurnoverProduct float64 `json:"turnover_product" db:"turnover_product"`
+}
+
+func SummaryByMerchant(merchantName string) Summary {
+	var i Summary
+
+	err := app.DB.Get(&i, `select
+    merchant_name,
+    sum(product_cost) as sum,
+    count(distinct check_id_global) as count,
+    round(sum(product_cost)/count(distinct check_id_global)::numeric,2) as turnover,
+    count(distinct user_id) as users,
+    round(sum(product_cost)/count(distinct user_id)::numeric,2) as turnover_users,
+    round(sum(interchange_sum)::numeric,2) as interchange_sum,
+    round(sum(interchange_sum)/ sum(product_cost)*100::numeric,2) as turnover_product
+from transaction where merchant_name=$1
+group by merchant_name order by count desc;`, merchantName)
+	api.CheckErrInfo(err, "SummaryByMerchant 1")
+	return i
+}
+
+func SummaryMerchantAll() []Summary {
+	rows, err := app.DB.Queryx(`select
+    merchant_name,
+    sum(product_cost) as sum,
+    count(distinct check_id_global) as count,
+    round(sum(product_cost)/count(distinct check_id_global)::numeric,2) as turnover,
+    count(distinct user_id) as users,
+    round(sum(product_cost)/count(distinct user_id)::numeric,2) as turnover_users,
+    round(sum(interchange_sum)::numeric,2) as interchange_sum,
+    round(sum(interchange_sum)/ sum(product_cost)*100::numeric,2) as turnover_product
+from transaction
+group by merchant_name order by count desc;`)
+	api.CheckErrInfo(err, "SummaryMerchantAll 1")
+
+	i := []Summary{}
+
+	for rows.Next() {
+		var item Summary
+		err = rows.StructScan(&item)
+		api.CheckErrInfo(err, "SummaryMerchantAll 2")
+		i = append(i, item)
+	}
+	_ = rows.Close()
+	return i
 }

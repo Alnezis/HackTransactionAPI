@@ -1,8 +1,7 @@
 package controllers
 
 import (
-	"HackTransactionAPI/api"
-	"HackTransactionAPI/app"
+	"HackTransactionAPI/merchant"
 	"HackTransactionAPI/statistic"
 	"HackTransactionAPI/transaction"
 	"encoding/json"
@@ -159,6 +158,47 @@ func ProductRating(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
 	i := statistic.ProductRating()
+
+	json.NewEncoder(w).Encode(&Response{
+		Result: i,
+	})
+}
+
+func SummaryMerchantAll(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+
+	i := statistic.SummaryMerchantAll()
+
+	json.NewEncoder(w).Encode(&Response{
+		Result: i,
+	})
+}
+
+func SummaryByMerchant(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	params := r.URL.Query()
+
+	if params["merchant_name"] == nil {
+		json.NewEncoder(w).Encode(&Response{
+			Error: &Error{
+				Message: "merchant_name отсутствует в запросе",
+				Code:    202,
+			},
+		})
+		return
+	}
+
+	if !merchant.Exist(params["merchant_name"][0]) {
+		json.NewEncoder(w).Encode(&Response{
+			Error: &Error{
+				Message: fmt.Sprintf("merchant_name (%s) отсутствует в базе", params["merchant_name"][0]),
+				Code:    500,
+			},
+		})
+		return
+	}
+
+	i := statistic.SummaryByMerchant(params["merchant_name"][0])
 
 	json.NewEncoder(w).Encode(&Response{
 		Result: i,
