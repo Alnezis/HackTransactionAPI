@@ -1,0 +1,11 @@
+#конфиг битый, если хотите запустить на своей машине, обратитесь за данными от бд в чат команды
+
+port: 1337
+secretkey: odkefofj20hg392k0djfh39
+db:
+  host: "1.19"
+  dbname: "hatr"
+  username: "pmin"
+  port: "5432"
+  password: "11"
+
