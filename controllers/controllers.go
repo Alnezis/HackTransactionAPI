@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"HackTransactionAPI/api"
+	"HackTransactionAPI/app"
 	"HackTransactionAPI/statistic"
 	"HackTransactionAPI/transaction"
 	"encoding/json"
@@ -80,6 +82,42 @@ func Checks(w http.ResponseWriter, r *http.Request) {
 	}
 
 	i := transaction.GetChecks(params["user_id"][0])
+
+	json.NewEncoder(w).Encode(&Response{
+		Result: i,
+	})
+}
+
+func MerchantProductRating(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+
+	params := r.URL.Query()
+	fmt.Println(params)
+
+	if params["merchant_name"] == nil {
+		json.NewEncoder(w).Encode(&Response{
+			Error: &Error{
+				Message: "merchant_name отсутствует в запросе",
+				Code:    202,
+			},
+		})
+		return
+	}
+
+	var exist bool
+	err := app.DB.Get(&exist, `SELECT exists(select id FROM transaction where  merchant_name = $1);`, params["merchant_name"][0])
+	api.CheckErrInfo(err, "MerchantProductRating 9")
+	if !exist {
+		json.NewEncoder(w).Encode(&Response{
+			Error: &Error{
+				Message: "merchant_name отсутствует в базе",
+				Code:    500,
+			},
+		})
+		return
+	}
+
+	i := statistic.MerchantProductRating(params["merchant_name"][0])
 
 	json.NewEncoder(w).Encode(&Response{
 		Result: i,

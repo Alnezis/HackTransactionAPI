@@ -82,3 +82,77 @@ func ProductRating() []Result {
 	}
 	return res
 }
+
+func MerchantProductRating(merchantName string) []Result {
+
+	var m = map[string]*Result{}
+
+	var sumCost int
+	err := app.DB.Get(&sumCost, `SELECT sum(product_cost) as sum FROM transaction where  merchant_name = $1;`, merchantName)
+	api.CheckErrInfo(err, "MerchantProductRating 1")
+
+	rows, err := app.DB.Queryx(`SELECT product_name, sum(product_cost)::float/$1*100 as sum FROM transaction
+                                                            where merchant_name = $2 GROUP BY product_name  ORDER BY sum DESC;`, sumCost, merchantName)
+	api.CheckErrInfo(err, "MerchantProductRating 2")
+
+	var i float64
+
+	for rows.Next() {
+		var item T
+		err = rows.StructScan(&item)
+		api.CheckErrInfo(err, "MerchantProductRating 3")
+		if i < 80 {
+
+			m[item.ProductName] = &Result{A: true, PsA: item.Sum}
+			i += item.Sum
+		} else {
+
+			m[item.ProductName] = &Result{A: false, PsA: item.Sum}
+			continue
+		}
+
+	}
+	fmt.Println(i)
+	_ = rows.Close()
+
+	var sumCount int
+	err = app.DB.Get(&sumCount, `SELECT count(*) as sum FROM transaction where  merchant_name = $1;`, merchantName)
+	api.CheckErrInfo(err, "MerchantProductRating 4")
+
+	rows, err = app.DB.Queryx(`SELECT product_name, count(product_cost)::float/$1*100 as sum FROM transaction
+                                                            where merchant_name = $2 GROUP BY product_name  ORDER BY sum DESC;`, sumCount, merchantName)
+	api.CheckErrInfo(err, "MerchantProductRating 5")
+
+	i = 0
+	for rows.Next() {
+		var item T
+		err = rows.StructScan(&item)
+		api.CheckErrInfo(err, "MerchantProductRating 7")
+		if i < 80 {
+			m[item.ProductName].PsB = item.Sum
+			m[item.ProductName].B = true
+			i += item.Sum
+		} else {
+			fmt.Println(i)
+			break
+			//continue
+		}
+	}
+	_ = rows.Close()
+
+	var res = []Result{}
+	for pn, v := range m {
+		if v.A {
+			if v.B {
+				//		fmt.Println(fmt.Sprintf("%s - A: %f, B: %f", pn, v.PsA, v.PsB))
+				res = append(res, Result{
+					ProductName: pn,
+					PsA:         v.PsA,
+					PsB:         v.PsB,
+				})
+			}
+		}
+	}
+	fmt.Println(res, len(res))
+	return res
+}
