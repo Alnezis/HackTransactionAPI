@@ -111,7 +111,7 @@ func MerchantProductRating(merchantName string) []Result {
 		api.CheckErrInfo(err, "MerchantProductRating 3")
 		if i < 80 {
 
-			m[item.ProductName] = &Result{A: true, PsA: item.Sum}
+			m[item.ProductName] = &Result{A: true, PsA: math.Round(item.Sum*100) / 100}
 			i += item.Sum
 		} else {
 
@@ -123,7 +123,7 @@ func MerchantProductRating(merchantName string) []Result {
 	fmt.Println(i)
 	_ = rows.Close()
 
-	var sumCount int
+	var sumCount float64
 	err = app.DB.Get(&sumCount, `SELECT count(*) as sum FROM transaction where  merchant_name = $1;`, merchantName)
 	api.CheckErrInfo(err, "MerchantProductRating 4")
 
@@ -137,7 +137,7 @@ func MerchantProductRating(merchantName string) []Result {
 		err = rows.StructScan(&item)
 		api.CheckErrInfo(err, "MerchantProductRating 7")
 		if i < 80 {
-			m[item.ProductName].PsB = item.Sum
+			m[item.ProductName].PsB = math.Round(item.Sum*100) / 100
 			m[item.ProductName].B = true
 			i += item.Sum
 		} else {
@@ -161,6 +161,9 @@ func MerchantProductRating(merchantName string) []Result {
 			}
 		}
 	}
+	sort.Slice(res, func(i, j int) (less bool) {
+		return res[i].ProductName < res[j].ProductName
+	})
 	fmt.Println(res, len(res))
 	return res
 }
@@ -194,7 +197,7 @@ func SummaryByMerchant(merchantName string) Summary {
     round(sum(interchange_sum)/ sum(product_cost)*100::numeric,2) as turnover_product,
     mcc
 from transaction where merchant_name=$1
-group by merchant_name, mcc order by count desc;`, merchantName)
+group by merchant_name, mcc order by turnover_product desc;`, merchantName)
 	api.CheckErrInfo(err, "SummaryByMerchant 1")
 	i.MccName = etc.MccName(i.Mcc)
 	return i

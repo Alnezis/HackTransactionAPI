@@ -3,6 +3,7 @@ package transaction
 import (
 	"HackTransactionAPI/api"
 	"HackTransactionAPI/app"
+	"HackTransactionAPI/etc"
 	"fmt"
 	"github.com/CossackPyra/pyraconv"
 	"github.com/tealeg/xlsx"
@@ -59,6 +60,7 @@ type Check struct {
 	Count          int     `json:"count" db:"count"`
 	Sum            float64 `json:"sum" db:"sum"`
 	Mcc            int     `json:"mcc" db:"mcc"`
+	MccName        string  `json:"mcc_name" db:"mcc_name"`
 	InterchangeSum float64 `json:"interchange_sum" db:"interchange_sum"`
 	CardType       string  `json:"card_type" db:"card_type"`
 }
@@ -73,6 +75,7 @@ func GetChecks(userID string) []Check {
 		var item Check
 		err = rows.StructScan(&item)
 		api.CheckErrInfo(err, "GetChecks")
+		item.MccName = etc.MccName(item.Mcc)
 		i = append(i, item)
 	}
 	_ = rows.Close()
