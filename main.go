@@ -39,6 +39,10 @@ func main() {
 	router.HandleFunc("/statistic/summaryMerchantAll", controllers.SummaryMerchantAll).Methods("GET")
 	router.HandleFunc("/statistic/summaryByMerchant", controllers.SummaryByMerchant).Methods("GET")
 
+	router.HandleFunc("/user/summaryUserInMerchantByName", controllers.SummaryUserInMerchantByName).Methods("GET")
+	router.HandleFunc("/user/summaryUserInMerchantAllSum", controllers.SummaryUserInMerchantAllSum).Methods("GET")
+	router.HandleFunc("/user/summaryUserInMerchantAll", controllers.SummaryUserInMerchantAll).Methods("GET")
+
 	router.HandleFunc("/statistic/merchantProductRating", controllers.MerchantProductRating).Methods("GET")
 	router.HandleFunc("/uploadImage", controllers.UploadFile).Methods("POST")
 

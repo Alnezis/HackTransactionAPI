@@ -4,6 +4,7 @@ import (
 	"HackTransactionAPI/merchant"
 	"HackTransactionAPI/statistic"
 	"HackTransactionAPI/transaction"
+	"HackTransactionAPI/user"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -199,6 +200,119 @@ func SummaryByMerchant(w http.ResponseWriter, r *http.Request) {
 	}
 
 	i := statistic.SummaryByMerchant(params["merchant_name"][0])
+
+	json.NewEncoder(w).Encode(&Response{
+		Result: i,
+	})
+}
+
+func SummaryUserInMerchantByName(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	params := r.URL.Query()
+
+	if params["merchant_name"] == nil {
+		json.NewEncoder(w).Encode(&Response{
+			Error: &Error{
+				Message: "merchant_name отсутствует в запросе",
+				Code:    202,
+			},
+		})
+		return
+	}
+
+	if !merchant.Exist(params["merchant_name"][0]) {
+		json.NewEncoder(w).Encode(&Response{
+			Error: &Error{
+				Message: fmt.Sprintf("merchant_name (%s) отсутствует в базе", params["merchant_name"][0]),
+				Code:    500,
+			},
+		})
+		return
+	}
+
+	if params["user_id"] == nil && params["user_id"][0] == "" {
+		json.NewEncoder(w).Encode(&Response{
+			Error: &Error{
+				Message: "user_id отсутствует в запросе",
+				Code:    202,
+			},
+		})
+		return
+	}
+
+	if !user.Exist(params["user_id"][0]) {
+		json.NewEncoder(w).Encode(&Response{
+			Error: &Error{
+				Message: fmt.Sprintf("user_id (%s) отсутствует в базе", params["user_id"][0]),
+				Code:    500,
+			},
+		})
+		return
+	}
+
+	i := user.SummaryUserInMerchantByName(params["user_id"][0], params["merchant_name"][0])
+
+	json.NewEncoder(w).Encode(&Response{
+		Result: i,
+	})
+}
+
+func SummaryUserInMerchantAllSum(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	params := r.URL.Query()
+
+	if params["user_id"] == nil && params["user_id"][0] == "" {
+		json.NewEncoder(w).Encode(&Response{
+			Error: &Error{
+				Message: "user_id отсутствует в запросе",
+				Code:    202,
+			},
+		})
+		return
+	}
+
+	if !user.Exist(params["user_id"][0]) {
+		json.NewEncoder(w).Encode(&Response{
+			Error: &Error{
+				Message: fmt.Sprintf("user_id (%s) отсутствует в базе", params["user_id"][0]),
+				Code:    500,
+			},
+		})
+		return
+	}
+
+	i := user.SummaryUserInMerchantAllSum(params["user_id"][0])
+
+	json.NewEncoder(w).Encode(&Response{
+		Result: i,
+	})
+}
+
+func SummaryUserInMerchantAll(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	params := r.URL.Query()
+
+	if params["user_id"] == nil && params["user_id"][0] == "" {
+		json.NewEncoder(w).Encode(&Response{
+			Error: &Error{
+				Message: "user_id отсутствует в запросе",
+				Code:    202,
+			},
+		})
+		return
+	}
+
+	if !user.Exist(params["user_id"][0]) {
+		json.NewEncoder(w).Encode(&Response{
+			Error: &Error{
+				Message: fmt.Sprintf("user_id (%s) отсутствует в базе", params["user_id"][0]),
+				Code:    500,
+			},
+		})
+		return
+	}
+
+	i := user.SummaryUserInMerchantAll(params["user_id"][0])
 
 	json.NewEncoder(w).Encode(&Response{
 		Result: i,
