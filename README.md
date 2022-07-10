@@ -18,4 +18,13 @@ Routes:
 - URL: https://alnezis.riznex.ru:1337/statistic/summaryMerchantAll
 ![image](https://user-images.githubusercontent.com/56168421/178118940-461a3e58-be75-46ee-b799-f6f2105e20ae.png)
 
+- URL: https://alnezis.riznex.ru:1337/user/summaryUserInMerchantAll?user_id=1
+![image](https://user-images.githubusercontent.com/56168421/178140182-7aebc3de-206e-4a09-9709-be813962a4bf.png)
+
+- URL: https://alnezis.riznex.ru:1337/user/summaryUserInMerchantAllSum?user_id=1
+![image](https://user-images.githubusercontent.com/56168421/178140202-6593cfa3-634b-47fa-a34f-ca4b10d3726c.png)
+
+- URL: https://alnezis.riznex.ru:1337/user/summaryUserInMerchantByName?user_id=1&merchant_name=Магнит
+![image](https://user-images.githubusercontent.com/56168421/178140274-a21928ec-a622-4f23-8d5a-13e5cd03e2ff.png)
+
 
