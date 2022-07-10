@@ -197,7 +197,7 @@ func SummaryByMerchant(merchantName string) Summary {
     round(sum(interchange_sum)/ sum(product_cost)*100::numeric,2) as turnover_product,
     mcc
 from transaction where merchant_name=$1
-group by merchant_name, mcc order by turnover_product desc;`, merchantName)
+group by merchant_name, mcc order by count desc;`, merchantName)
 	api.CheckErrInfo(err, "SummaryByMerchant 1")
 	i.MccName = etc.MccName(i.Mcc)
 	return i
@@ -215,7 +215,7 @@ func SummaryMerchantAll() []Summary {
     round(sum(interchange_sum)/ sum(product_cost)*100::numeric,2) as turnover_product,
     mcc
 from transaction
-group by merchant_name, mcc order by count desc;`)
+group by merchant_name, mcc order by turnover_product desc;`)
 	api.CheckErrInfo(err, "SummaryMerchantAll 1")
 
 	i := []Summary{}
